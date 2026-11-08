@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "roi.lens"
+version = "0.1.0"
+description = "Estimate AI use-case ROI as a range, not a hopeful single number. Seeded Monte Carlo over uncertain inputs, with the odds of losing money. Dependency-free Python."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "AndMaverick LLC" }]
+
+[tool.setuptools.packages.find]
+include = ["roi_lens*"]
