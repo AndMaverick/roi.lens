@@ -2,7 +2,7 @@
 
 Most AI business cases show one number. roi.lens shows the range. Give each uncertain input a low, expected, and high value, and it runs a seeded Monte Carlo simulation to report the 10th, 50th, and 90th percentile net value and the probability the project makes money at all. Standard library only.
 
-Capital allocation conversations get better when the question changes from "what is the ROI" to "how likely is it that we lose money, and what would change that". If you are deciding where to put AI budget, I run that analysis with leadership teams through an [architecture review](https://calendly.com/andmaverick/30min?utm_source=github&utm_medium=repo&utm_campaign=roi.lens).
+Capital allocation conversations get better when the question changes from "what is the ROI" to "how likely is it that we lose money, and what would change that". If you are deciding where to put AI budget, I run that analysis with leadership teams through an [architecture review](https://calendly.com/andmaverick?utm_source=github&utm_medium=repo&utm_campaign=roi.lens).
 
 ## Use
 
