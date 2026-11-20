@@ -1,6 +1,6 @@
 # roi.lens
 
-A business case that says "payback in fourteen months" has hidden every uncertain thing it depends on: how many agents there are, how many tickets the tool will really deflect, whether the integration slips by a quarter. Leadership approves the number and discovers the assumptions later, as surprises.
+A business case that says something like "payback in fourteen months" has hidden every uncertain thing it depends on: how many agents there are, how many tickets the tool will really deflect, whether the integration slips by a quarter. Leadership approves the number and discovers the assumptions later, as surprises.
 
 roi.lens shows the range instead, and what it would take to narrow it. Give each uncertain input a distribution, describe the timing and the risks, and it runs a seeded simulation that reports the odds of making money, the average of the bad cases, how long payback takes, which inputs drive the answer, and what it would be worth to find out more before you commit. Standard library only, Python 3.10 to 3.13.
 
