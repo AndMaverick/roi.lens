@@ -1,64 +1,37 @@
-"""roi.lens: estimate AI use-case ROI as a range, not a single hopeful number."""
-
+"""roi.lens: decision-grade ROI for AI projects. Honest uncertainty, tested against closed-form answers, reproducible to the bit."""
 from __future__ import annotations
 
-import random
-from dataclasses import dataclass
+from typing import Any, overload
 
-__version__ = "0.1.0"
-
-
-@dataclass(frozen=True)
-class UseCase:
-    name: str
-    users: int
-    hours_saved_per_user_month: tuple   # (low, expected, high)
-    hourly_cost: float
-    adoption: tuple                     # (low, expected, high) share of users who use it, 0 to 1
-    monthly_run_cost: float
-    build_cost: float
-
-
-def triangular(rng: random.Random, spec: tuple) -> float:
-    low, mode, high = spec
-    if not low <= mode <= high:
-        raise ValueError("expected low <= expected <= high")
-    return rng.triangular(low, high, mode)
+from ._version import __version__
+from .analysis import breakeven, evpi, evppi, pilot_value, rank_drivers, tornado, value_of_information
+from .calibration import Answer, calibrate, scale_interval
+from .distributions import Empirical, Fixed, Lognormal, Normal, Pert, Triangular, Uniform, from_ci90, from_dict
+from .engine import Outcome, Run, evaluate
+from .engine import simulate as simulate_model
+from .expr import Expr, ExprError, compile_expr
+from .model import Event, Model
+from .portfolio import Case, plan
+from .report import analyze, render_markdown, render_text
+from .scenario import Scenario, load, parse
+from .simple import UseCase, point_estimate, rank, triangular
+from .simple import simulate as simulate_simple
 
 
-def monthly_value(case: UseCase, hours: float, adoption: float) -> float:
-    return case.users * adoption * hours * case.hourly_cost
+@overload
+def simulate(subject: UseCase, months: int = 12, trials: int = 5000, seed: int = 7) -> dict[str, float]: ...
+@overload
+def simulate(subject: Model, trials: int = 5000, seed: int = 7, method: str = "lhs") -> Run: ...
+def simulate(subject: UseCase | Model, *args: Any, **kwargs: Any) -> dict[str, float] | Run:
+    """One name for both generations. A ``UseCase`` runs the original 0.1 simulation (unchanged); a ``Model`` runs the full engine."""
+    if isinstance(subject, UseCase):
+        return simulate_simple(subject, *args, **kwargs)
+    return simulate_model(subject, *args, **kwargs)
 
-
-def point_estimate(case: UseCase, months: int = 12) -> dict:
-    """ROI using the expected value of every input."""
-    value = monthly_value(case, case.hours_saved_per_user_month[1], case.adoption[1])
-    net = (value - case.monthly_run_cost) * months - case.build_cost
-    return {"net": round(net, 2), "roi": round(net / case.build_cost, 4) if case.build_cost else None}
-
-
-def simulate(case: UseCase, months: int = 12, trials: int = 5000, seed: int = 7) -> dict:
-    """Monte Carlo over the uncertain inputs. Seeded, so results are reproducible."""
-    rng = random.Random(seed)
-    nets = []
-    for _ in range(trials):
-        hours = triangular(rng, case.hours_saved_per_user_month)
-        adopt = triangular(rng, case.adoption)
-        value = monthly_value(case, hours, adopt)
-        nets.append((value - case.monthly_run_cost) * months - case.build_cost)
-    nets.sort()
-
-    def pct(p: float) -> float:
-        return round(nets[min(len(nets) - 1, int(p * len(nets)))], 2)
-
-    return {"p10": pct(0.10), "p50": pct(0.50), "p90": pct(0.90),
-            "prob_positive": round(sum(n > 0 for n in nets) / len(nets), 4)}
-
-
-def rank(cases: list, months: int = 12, trials: int = 2000, seed: int = 7) -> list:
-    """Use cases ordered by median net value, with the odds of losing money alongside."""
-    rows = []
-    for case in cases:
-        result = simulate(case, months, trials, seed)
-        rows.append({"name": case.name, **result})
-    return sorted(rows, key=lambda r: (-r["p50"], r["name"]))
+__all__ = [
+    "__version__",
+    "Answer", "Case", "Empirical", "Event", "Expr", "ExprError", "Fixed", "Lognormal", "Model", "Normal", "Outcome", "Pert", "Run",
+    "Scenario", "Triangular", "Uniform", "UseCase", "analyze", "breakeven", "calibrate", "compile_expr", "evaluate", "evpi", "evppi",
+    "from_ci90", "from_dict", "load", "parse", "pilot_value", "plan", "point_estimate", "rank", "rank_drivers", "render_markdown",
+    "render_text", "scale_interval", "simulate", "simulate_simple", "tornado", "triangular", "value_of_information",
+]
