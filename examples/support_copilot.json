@@ -1,0 +1,131 @@
+{
+  "name": "Support copilot for a 50-agent help desk",
+  "description": "An AI drafting assistant for tier-1 support. Every range below is an illustrative estimate to be replaced with your own; the structure is the point.",
+  "horizon_months": 36,
+  "build_months": 4,
+  "ramp_months": 6,
+  "ramp": "smooth",
+  "benefit_decay_per_year": 0.08,
+  "discount_rate": 0.1,
+  "inputs": {
+    "agents": {
+      "dist": "pert",
+      "low": 40,
+      "mode": 50,
+      "high": 70
+    },
+    "tickets_per_agent_month": {
+      "dist": "pert",
+      "low": 280,
+      "mode": 360,
+      "high": 450
+    },
+    "deflect_rate": {
+      "dist": "ci90",
+      "low": 0.25,
+      "high": 0.55,
+      "lower": 0,
+      "upper": 1
+    },
+    "cost_per_ticket": {
+      "dist": "ci90",
+      "low": 4.5,
+      "high": 9.5,
+      "kind": "lognormal"
+    },
+    "llm_cost_per_ticket": {
+      "dist": "ci90",
+      "low": 0.05,
+      "high": 0.3,
+      "kind": "lognormal"
+    },
+    "platform_fee": {
+      "dist": "uniform",
+      "low": 3000,
+      "high": 6000
+    },
+    "engineer_month": {
+      "dist": "pert",
+      "low": 5500,
+      "mode": 7000,
+      "high": 9500
+    },
+    "integration_cost": {
+      "dist": "pert",
+      "low": 90000,
+      "mode": 140000,
+      "high": 260000
+    },
+    "change_cost": {
+      "dist": "triangular",
+      "low": 15000,
+      "mode": 30000,
+      "high": 70000
+    }
+  },
+  "benefits": {
+    "deflected_ticket_cost": "agents * tickets_per_agent_month * deflect_rate * cost_per_ticket"
+  },
+  "run_costs": {
+    "model_usage": "agents * tickets_per_agent_month * llm_cost_per_ticket",
+    "platform": "platform_fee",
+    "maintenance": "0.5 * engineer_month"
+  },
+  "one_time_costs": {
+    "integration": "integration_cost",
+    "training_and_change": "change_cost"
+  },
+  "events": [
+    {
+      "name": "integration_slips",
+      "probability": 0.3,
+      "kind": "delay",
+      "amount": {
+        "dist": "uniform",
+        "low": 1,
+        "high": 5
+      }
+    },
+    {
+      "name": "quality_incident",
+      "probability": 0.15,
+      "kind": "benefit_factor",
+      "amount": {
+        "dist": "pert",
+        "low": 0.5,
+        "mode": 0.7,
+        "high": 0.9
+      }
+    },
+    {
+      "name": "vendor_price_rise",
+      "probability": 0.2,
+      "kind": "extra_cost",
+      "month": 13,
+      "amount": {
+        "dist": "uniform",
+        "low": 20000,
+        "high": 60000
+      }
+    },
+    {
+      "name": "sponsor_pulls_funding",
+      "probability": 0.05,
+      "kind": "cancel",
+      "month": 12
+    }
+  ],
+  "correlations": [
+    {
+      "a": "deflect_rate",
+      "b": "llm_cost_per_ticket",
+      "rho": 0.3
+    }
+  ],
+  "gates": {
+    "min_expected_npv": 0,
+    "min_prob_positive": 0.8,
+    "min_p10_npv": -100000,
+    "max_payback_p90_months": 30
+  }
+}

@@ -4,12 +4,30 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "roi.lens"
-version = "0.1.0"
-description = "Estimate AI use-case ROI as a range, not a hopeful single number. Seeded Monte Carlo over uncertain inputs, with the odds of losing money. Dependency-free Python."
+version = "0.2.0"
+description = "Decision-grade AI business cases: calibrated ranges, correlated Monte Carlo with Latin hypercube sampling, risk events, NPV, IRR and payback distributions, tornado and rank sensitivity, value of information, break-even assumptions, portfolios under a budget, and CI gates. Seeded and dependency-free Python."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "AndMaverick LLC" }]
 
+[project.scripts]
+roi-lens = "roi_lens.cli:main"
+
+[tool.setuptools.package-data]
+roi_lens = ["py.typed"]
+
 [tool.setuptools.packages.find]
 include = ["roi_lens*"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "C4", "SIM"]
+ignore = ["E501"]
+
+[tool.mypy]
+strict = true
+files = ["roi_lens"]

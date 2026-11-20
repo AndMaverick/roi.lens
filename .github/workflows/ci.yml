@@ -7,10 +7,11 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,3 +19,25 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Unit tests
         run: python -m unittest discover -s tests -t . -v
+      - name: Command line smoke test
+        run: python -m roi_lens --help
+      - name: Example decision gate
+        run: python -m roi_lens analyze examples/support_copilot.json
+      - name: Failing example must exit 1
+        run: |
+          set +e
+          python -m roi_lens analyze examples/marginal_copilot.json > /dev/null
+          test "$?" -eq 1
+      - name: Verification figures
+        run: python examples/evaluate.py
+
+  quality:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff mypy
+      - run: ruff check .
+      - run: mypy
